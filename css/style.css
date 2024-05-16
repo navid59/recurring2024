@@ -1,0 +1,33 @@
+.fa-stack[data-count]:after{
+    position:absolute;
+    right:0%;
+    top:1%;
+    content: attr(data-count);
+    font-size:70%;
+    padding:.6em;
+    border-radius:999px;
+    line-height:.75em;
+    color: white;
+    background:rgba(255,0,0,.85);
+    text-align:center;
+    min-width:2em;
+    font-weight:bold;
+  }
+
+  table.dataTable tbody tr:hover {
+    background-color:#f0f0f1;
+    /* font-weight: bold; */
+  }
+  
+  table.dataTable tbody tr:hover > .sorting_1 {
+    background-color: #f0f0f1;
+    /* font-weight: bold; */
+  }
+  
+  table.dataTable thead:hover {
+    background-color: #f0f0f1;
+    /* font-weight: bold; */
+  }
+  
+table.dataTable tr.odd { background-color: #f6f7f7; }
+table.dataTable tr.even { background-color: white; }

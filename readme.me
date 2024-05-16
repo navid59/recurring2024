@@ -1,0 +1,56 @@
+# Recurring Payments
+### Wordpress Recurring Payments
+
+## Compatibility
+PHP 7.4.x
+Wordpress 6.0
+
+## Require 
+- Active rewrite mod
+To active rewrite mod , you can add the following code in your ".htaccess" file
+
+Ex. 
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+RewriteBase /
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.php [L]
+</IfModule>
+
+In Wordpress Admin -> Setting -> Permalink as Permalink structure, set to use rewrite mod.
+
+## Instalare 
+- instalarea pluginului se face din WordPress>Plugins>Add new
+- Add plugins (top left)- Upload Plugin
+
+## Setari
+
+dupa finalizarea instalarii pluginului accesati setari plugin sau 
+Accesati meniul din WordPress> Recurring v1> Settings 
+Pentru descarcarea Api key-ului este necesar sa va logati in https://admin.netopia-payments.com/> profil (omulet top right)>Securitate> la Cheie API denumiti cheia si apasati Genereaza Cheie.
+Cheia generata o copiati (click pe fisierle verzi din stanga cheii for fast copy) si o inserati in WordPress>Recurring v1>Settings> Live Api Key
+Din adminul NETOPIA mergeti la Puncte de vanzare>Vezi lista punctelor de vanzare iar din Punctul de vanzare pe care il folositi apasati> Setari tehnice si copiati semnatura Punctului de vanzare.
+
+Pentru a obtine Sandbox Api key urmati urmatorii pasi:
+Din https://admin.netopia-payments.com/ - mergeti la Puncte de vanzare>Vezi lista punctelor de vanzare iar din Punctul de vanzare pe care il folositi apasati>Card>selectati platforma (WordPress)>Mediu de TEST> introduceti datele de autentificare (cele pe care le folositi la autentificarea in platforma NETOPIA)
+Accesati profil (omulet top right)>Securitate> la Cheie API denumiti cheia si apasati Genereaza Cheie.
+
+Cheia generata o copiati (click pe fisierle verzi din stanga cheii for fast copy) si o inserati in WordPress>Recurring v1>Settings> Sandbox API Key si setam pluginul in mediul in care dorim sa ruleze Live Mod> Mediul de productie sau Sandbox mod>Mediu testare
+
+Definiti planul/planurile pentru care doriti subscriptie din Meniul pluginului de subscriptii accesati Plans>Add/Edit Plan
+Dupa definirea planului accesati Submmit 
+Se genereaza shortcode-ul planului pe care trebuie sa il inserati in pagina produsului pentru care doriti recurenta.
+
+Plan Title- Numele planului
+Plan Description - Descrierea planului
+Frequency Type - Tipul frecventei (zi/luna/an)
+Frequncy Value - Valoarea frecventei (exemplu: daca Frequncy Type= Monthly iar Frequncy Value= 3 inseamna ca recurenta va rula o data la 3 luni, etc)
+Amount (doar RON) = Valoarea planului
+Grace Period= Perioada de gratie( depinde in functie de Frequency Type. ATENTIE daca Frequncy Type = Monthly saur Yearly iar la Grace period =3 inseamna ca perioada de gratie este de 3luni/ani!!!) este comerciantul
+Initial Payment= daca se pune aceasta bifa, clientul va trebui sa achite valoarea subscriptiei in momentul abonarii.
+
+## contact 
+- suport@netopia-system.com
