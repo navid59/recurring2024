@@ -20,14 +20,16 @@ function notify() {
 }
 
 add_action('rest_api_init', function() {
-    @register_rest_route('ntp-recurring/v1', 'notify', [
+    register_rest_route('ntp-recurring/v1', 'notify', [
         'methods' => 'GET',
         'callback' => 'notAllowed',
+        'permission_callback' => '__return_true', // Allows public access
     ]);
     
-    @register_rest_route('ntp-recurring/v1', 'notify', [
+    register_rest_route('ntp-recurring/v1', 'notify', [
         'methods' => 'POST',
         'callback' => 'notify',
+        'permission_callback' => '__return_true', // Allows public access
     ]);
 });
 
@@ -48,9 +50,14 @@ function getHeaderRequest() {
     $ipnResponse = $ntpIpn->verifyIPN();
 
     /**
-    * IPN Output
+    * IPN Output | Important to be Printed
     */
-    echo json_encode($ipnResponse);   
+    echo json_encode($ipnResponse);  
+    
+
+    write_log("--- wc-netopiapayments-recurring-notify.php | notify use the IPN As well | This is result of verifyIPN() from notify ---");
+    write_log($ipnResponse);
+    write_log("***************************");
 
     /**  
     * IPN is checked 
@@ -88,7 +95,7 @@ function getHeaderRequest() {
                 ); 
             }
 
-            /** To add suspended in history */
+            /** To add suspended in history & Change User Status */
             if($arrDate['NotifySubscription']['Status'] == 3) {
                 $wpdb->insert( 
                     $wpdb->prefix . $obj->getDbSourceName('history'), 

@@ -264,6 +264,36 @@ function unsubscriptionAdminModal(subscriptionId, subscriberName, planTitle) {
                 });
             });
 
+            /** Approvation action */
+            jQuery('#approbationByAdminButton').click(function (e){
+                alert("Approve Aprove!!!");
+                // jQuery('#unsubscriptionByAdminActionLoading').show();
+                // jQuery('#resubscriptionByAdminButton').hide();
+
+                // unsubscribeData = {
+                //     action : 'adminResubscription',
+                //     SubscriptionId : getNextPaymentData.subscriptionId,
+                // }
+
+                // jQuery.post(ajaxurl, unsubscribeData, function(response){
+                //     jsonResponse = JSON.parse(response);
+                //     // console.log(jsonResponse);
+                //     if(jsonResponse.status) {
+                //         jQuery('#unsubscriptionByAdminActionLoading').hide();
+                //         jQuery('#unsubscribeAdminMsgBlock').addClass('alert-success');
+                //         jQuery('#unsubscribeAdminAlertTitle').html('Success!');
+                //         jQuery('#unsubscribeAdminMsgContent').html(jsonResponse.msg);
+                //         jQuery('#unsubscribeAdminMsgBlock').addClass('show');
+                //     } else {
+                //         jQuery('#resubscriptionByAdminActionLoading').hide();
+                //         jQuery('#unsubscribeAdminMsgBlock').addClass('alert-warning');
+                //         jQuery('#unsubscribeAdminAlertTitle').html('Error!');
+                //         jQuery('#unsubscribeAdminMsgContent').html(jsonResponse.msg);
+                //         jQuery('#unsubscribeAdminMsgBlock').addClass('show');
+                //     }
+                // });
+            });
+
         } else {
             jQuery('#msgBlock').addClass('alert-warning');
             jQuery('#alertTitle').html('Error!');

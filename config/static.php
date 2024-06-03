@@ -1,9 +1,12 @@
 <?php 
-const BASE_URL_RECURRING_API_LIVE       = "https://recurring-api-fqvtst6pfa-ew.a.run.app/api/v1/";
-const BASE_URL_RECURRING_API_SANDBOX    = "https://recurring-api-fqvtst6pfa-ew.a.run.app/api/v1/";
+// const BASE_URL_RECURRING_API_LIVE       = "https://recurring-api-fqvtst6pfa-ew.a.run.app/api/v1/";
+// const BASE_URL_RECURRING_API_SANDBOX    = "https://recurring-api-fqvtst6pfa-ew.a.run.app/api/v1/";
 
-// const BASE_URL_RECURRING_API_LIVE       = "http://localhost:8080/api/v1/"; // We keep it Temporary for Debugging 
-// const BASE_URL_RECURRING_API_SANDBOX    = "http://localhost:8080/api/v1/"; // We keep it Temporary for Debugging 
+const BASE_URL_RECURRING_API_LIVE       = "http://localhost:8080/api/v1/"; // We keep it Temporary for Debugging 
+const BASE_URL_RECURRING_API_SANDBOX    = "http://localhost:8080/api/v1/"; // We keep it Temporary for Debugging 
+
+// const BASE_URL_RECURRING_API_LIVE       = "http://host.docker.internal:8080/api/v1/"; // For when we use DOCKER CONTAINER
+// const BASE_URL_RECURRING_API_SANDBOX    = "http://host.docker.internal:8080/api/v1/"; // For when we use DOCKER CONTAINER
 
 const URL_NETOPIA_PAYMENTS              = "https://netopia-payments.com/";
 const URL_NETOPIA_PAYMENTS_REGISTRATION = "https://netopia-payments.com/register/";

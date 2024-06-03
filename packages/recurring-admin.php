@@ -125,9 +125,6 @@ class recurringAdmin extends recurring {
         return $resultData;
     }
 
-
-
-
     function delPlan($formData){
         $url = self::getApiUrl('plan/delete'); 
         $planData = array(
@@ -239,6 +236,17 @@ class recurringAdmin extends recurring {
     */
     function setResubscription($formData){
         $url = self::getApiUrl('subscription/renew'); 
+        $postData = json_encode($formData);
+    
+        $resultData = self::getData($url, $postData);
+        return $resultData;
+    }
+
+    /**
+    * Approve subscribe a user
+    */
+    function setApproveSubscription($formData){
+        $url = self::getApiUrl('subscription/approve'); 
         $postData = json_encode($formData);
     
         $resultData = self::getData($url, $postData);
@@ -530,7 +538,7 @@ function getInfinitSubscribtion() {
 
 
         for ($i = 0 ; $i < count($subscriptions) ; $i++) {
-            $subscriptions[$i]['Status'] = $obj->getStatusStr('subscription',$subscriptions[$i]['Status']);
+            
             
             // Customize Plan info for Datatable
             $PlanList = json_decode($subscriptions[$i]['PlanList'], true);
@@ -549,6 +557,7 @@ function getInfinitSubscribtion() {
             
             $subscriptions[$i]['PlanTitle'] = $planInfoStr;
             $subscriptions[$i]['StartDate'] = date('Y-m-d', strtotime($subscriptions[$i]['StartDate']));
+
             $subscriptions[$i]['Action'] = '
             <button type="button" class="btn btn-secondary" onclick="subscriptionHistory(\''.$subscriptions[$i]['UserID'].'\')" style="margin-right:5px;" title="'.__('Subscriber history','ntpRp').'"><i class="fa fa-history"></i></button>
             <button type="button" class="btn btn-success" onclick="subscriptionDetails(\''.$subscriptions[$i]['UserID'].'\')" style="margin-right:5px;" title="'.__('Subscriber Info','ntpRp').'"><i class="fa fa-info"></i></button>
@@ -556,6 +565,9 @@ function getInfinitSubscribtion() {
                 <i class="fa fa-circle fa-stack-2x"></i>
                 <i class="fa fa-bell fa-stack-1x fa-inverse"></i>
             </span>';
+
+            // Replace status value with sutable string
+            $subscriptions[$i]['Status'] = $obj->getStatusStr('subscription',$subscriptions[$i]['Status']);
         }
     
     $resultData = array (
@@ -882,6 +894,53 @@ function recurring_adminResubscription() {
 
         // Sned mail
         $obj->informMember(__('Resubscription','ntpRp'), __('Your subscription is reactive by Administrator','ntpRp'));
+    } else {
+        $status = false;
+        $msg = $jsonResultData['message'];
+    }
+
+
+    $resubscribeResult = array(
+        'status'=> $status,
+        'msg'=> $msg,
+        );
+    
+    wp_send_json(json_encode($resubscribeResult));
+}
+
+
+/** Approve subscription Admin */
+add_action('wp_ajax_adminApproveSubscription', 'recurring_adminApproveSubscription');
+function recurring_adminApproveSubscription() {
+    global $wpdb;
+    $obj = new recurringAdmin();
+
+    $subscriptionData = array(
+            "Signature" => $obj->getSignature(),
+            "SubscriptionId" => $_POST['SubscriptionId']+0,
+            "isTestMod" => !$obj->isLive() 
+      );   
+
+    $jsonResultData = $obj->setApproveSubscription($subscriptionData); 
+
+    // Update subscription to DB 
+    if($jsonResultData['code'] === "00") {
+        $status = true; 
+        $msg = $jsonResultData['message'];
+
+        $wpdb->update( 
+            $wpdb->prefix . $obj->getDbSourceName('subscription'), 
+            array( 
+                'Status'          => 1,
+                'UpdatedAt'       => date("Y-m-d")
+            ),
+            array(
+                'Subscription_Id' => $_POST['SubscriptionId']
+            )
+        );
+
+        // Sned mail
+        $obj->informMember(__('ApproveSubscription','ntpRp'), __('Your subscription is approved by Administrator','ntpRp'));
     } else {
         $status = false;
         $msg = $jsonResultData['message'];

@@ -62,7 +62,9 @@ function enqueue_and_register_ntp_recurring_js_scripts(){
 function recurring_verifyAuth(){
     
     /** Log */
-    write_log('-- call--recurring_verifyAuth() --- for doVerifyAuth() ------');
+    write_log('--- call -- recurring_verifyAuth() -- to Do Verifiy Auth----');
+    write_log("ntpRp-NtpID : ".$_COOKIE['ntpRp-NtpID']);
+    write_log("ntpRp-AuthenticationToken : " . $_COOKIE['ntpRp-AuthenticationToken']);
 
     global $wpdb;
     $obj = new recurringFront();
@@ -178,7 +180,7 @@ function recurring_verifyAuth(){
     echo json_encode($verifyAuthResult);
 
     /** Log */
-    write_log('--{ C-A-3 } -- Happy End - recurring_verifyAuth() -!!!-- ');
+    write_log('-- Happy End - recurring_verifyAuth() --- DONE -- ');
     // wp_send_json();
     die();
 }
@@ -284,6 +286,9 @@ function recurring_addSubscription() {
      
     $jsonResultData = $obj->setSubscription($subscriptionData);
 
+    write_log("---- recurring_addSubscription() --- RESULT ----");
+    write_log($jsonResultData);
+    write_log("------------------------------------------------");
 
     // Add subscription to DB 
     if($jsonResultData['code'] === "00") {
@@ -309,6 +314,12 @@ function recurring_addSubscription() {
          * IMPORTANT 
          * @Navid Missing Add to History 
          *  */    
+        
+         /**
+          * NAVID to DO 
+          * Check if user is exist with Status Zero for same Plan ID Then Update the USER Status
+          * If is not exist Add IT 
+          */
 
         // Add subscription to DB 
         $wpdb->insert( $wpdb->prefix . $obj->getDbSourceName('subscription'), $arrSubscriptionData );
@@ -316,8 +327,8 @@ function recurring_addSubscription() {
         // Sned mail
         $obj->informMember(__('New subscription','ntpRp'), __('Congratulation you successfully subscribed','ntpRp'));
     } elseif ($jsonResultData['code'] === "19") {
-        /** Do nothing
-         *  Do not remove as well too
+        /** 
+         *  Add user as none confirm user
          *  */  
         $arrSubscriptionData = array(
             'Subscription_Id' => $jsonResultData['data']['subscriptionId'],
@@ -332,16 +343,16 @@ function recurring_addSubscription() {
             'PlanId'          => $_POST['PlanID'],
             'StartDate'       => date("Y-m-d"),
             'EndDate'         => "",
-            'Status'          => 0, // Payment is failed
+            'Status'          => 0, // Payment is not approved | Signed | or IP is missed
             'CreatedAt'       => date("Y-m-d"),
             'UpdatedAt'       => date("Y-m-d")
             );
 
-            $arrSubscriptionDataJson =  json_encode($arrSubscriptionData);
+            // Add subscription POTENTIAL Subscribers to DB With STATUS ZERO 
+            $wpdb->insert( $wpdb->prefix . $obj->getDbSourceName('subscription'), $arrSubscriptionData );
+
             
-        //    echo "<pre>";
-        //    var_dump($jsonResultData);
-        //    echo "</pre>";
+            $arrSubscriptionDataJson =  json_encode($arrSubscriptionData);
             
             /** Set Subscription info from cooke to be uesd it in countinu base on Payment result */
             setcookie('ntpRp-cookies-json', $arrSubscriptionDataJson, time() + 600 , '/');
@@ -851,7 +862,21 @@ function recurring_account_getMySubscriptions() {
                                 </div>
                             </div>
                         </div>';
-            } else {
+            } elseif($plan['userStatus'] == 0 ) {
+                $htmlThem.= '<div class="col-sm-6 pb-2">
+                            <div class="card">
+                                <div class="card-body">
+                                <h2 class="card-title">'.$plan['Title'].'</h2>
+                                <h3 class="card-title">'.$plan['Amount'].' '.$plan['Currency'].'</h3>
+                                <h4 class="card-title">'.$plan['Frequency_Type'].' / '.$plan['Frequency_Value'].'</h4>
+                                <p class="card-text">'.$plan['Description'].'</p>
+                                <div class="alert alert-danger" role="alert">
+                                '.__('Not Approved','ntpRp').'
+                                </div>
+                                </div>
+                            </div>
+                        </div>';
+            }else {
                 $htmlThem.= '<div class="col-sm-6 pb-2">
                             <div class="card">
                                 <div class="card-body">
@@ -1061,6 +1086,7 @@ function recurringModal($planId , $button, $title) {
     $verifyAuthFormHtml = '';
     $suspendedAlertTitile = __('Warning!','ntpRp');
     $suspendedAlertMessage = __(' inactivated for you','ntpRp');
+    $notApprovedButtonTitile = __('Not approved yet!','ntpRp');
     $unsubscriptionButtonTitile = __('Unsubscription','ntpRp');
     $unsubscriptionTitle = __('Unsubscription','ntpRp'); 
     
@@ -1081,6 +1107,12 @@ function recurringModal($planId , $button, $title) {
                     <div class="alert alert-warning">
                         <strong>'.$suspendedAlertTitile.'</strong> '.$planData['Title'].$suspendedAlertMessage.'.
                     </div>';
+                } elseif ($subscription[0]->Status == "0") {
+                    $buttonHtml = '
+                    <!-- Button Disable -->
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="" disabled>
+                        '.$notApprovedButtonTitile.'
+                    </button>';
                 } else {
                     /** Display Unsubscriptiuon */
                     $buttonHtml = '
@@ -1583,9 +1615,11 @@ function getCardInfoHtml($planId) {
 function get3DsFormHtml($planId) {
     $obj = new recurringFront();
     $backUrl = $obj->getBackUrl($planId);
+    $clientIP = getClientIP();
     return '
         <div id="dynamicForm'.$planId.'"></div>
         <input type="hidden" class="form-control" id="backUrl'.$planId.'" name="backUrl" value="'.$backUrl.'" title="independent element" readonly >
+        <input type="hidden" class="form-control" id="clientIP" name="clientIP" value="'.$clientIP['ip'].'" title="independent element" readonly >
     ';
 }
 
@@ -1761,4 +1795,10 @@ function isStrongPass($passwordStr) {
     }
 }
 
+function getClientIP() {
+    $ipAddress = $_SERVER['REMOTE_ADDR'];
+    return (array('ip' => $ipAddress));
+    // echo json_encode(array('ip' => $ipAddress));
+    // wp_die();
+}
 ?>

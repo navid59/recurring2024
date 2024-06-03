@@ -127,6 +127,18 @@
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
             curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json','token: '.$authenticationToken));
             $result = curl_exec($ch);
+
+            // Check for errors
+            if (curl_errno($ch)) {
+                $error_msg = curl_error($ch);
+                // Log or handle error
+                error_log('cURL error: ' . $error_msg);
+                curl_close($ch);
+                return false; // or handle error as needed
+            }
+
+            curl_close($ch);
+
             $jsonDate = $result;
             $arrayData = json_decode($jsonDate, true);
 
@@ -139,7 +151,7 @@
                 case 'subscription':
                     switch ($statusCode) {
                         case '0':
-                            $statusStr = 'New';
+                            $statusStr = 'Not Approved yet!';
                             break;
                         case '1':
                             $statusStr = 'Active';
@@ -187,7 +199,7 @@
                             $statusStr = 'Error - Not paid';
                             break;
                         case '15':
-                            $statusStr = 'Authorized';
+                            $statusStr = 'Need verify payment';
                             break;
                         case null:
                             $statusStr = '-';

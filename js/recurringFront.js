@@ -335,6 +335,31 @@ function unsubscriptionMyAccount() {
     });
 }
 
+// Function to retrieve client IP address via AJAX
+// Note : This function is not used, yet
+// function getClientIpAddress() {
+//     return new Promise(function(resolve, reject) {
+//         data = {
+//             action: 'getClientIP'
+//         };
+//         jQuery.ajax({
+//             url: frontAjax.ajax_url,
+//             type: 'POST',
+//             dataType: 'json',
+//             data: data,
+//             success: function(response) {
+//                 var clientIpAddress = response.ip;
+//                 resolve(clientIpAddress);
+//             },
+//             error: function(error) {
+//                 // Handle error by resolving with a default IP address
+//                 var clientIpAddress = "127.0.0.1";
+//                 resolve(clientIpAddress);
+//             }
+//         });
+//     });
+// }
+
 function addSubscription(e) {   
     e.preventDefault(); // to stop Submit Event
     var form = jQuery(this);
@@ -361,7 +386,10 @@ function addSubscription(e) {
     var ExpYear = jQuery('#'+formId).find('input[name=cc-expiration-year]').val();
     var SecretCode = jQuery('#'+formId).find('input[name=cc-cvv]').val();
 
-    var ThreeDS = sendClientBrowserInfo();
+    
+    // Send client ID to 3DS js
+    var ClientIpAddress = jQuery('#'+formId).find('input[name=clientIP]').val();
+    var ThreeDS = sendClientBrowserInfo(ClientIpAddress);
 
     var BackUrl = jQuery('#backUrl'+PlanID).val(); // will be contain current page + ID of plan
     

@@ -81,7 +81,7 @@ EMBEDDED:"embedded"};g.ENGINE={NAME:"name",VERSION:"version"};g.OS={NAME:"name",
 typeof window?window:this);
 
 
-function sendClientBrowserInfo() {
+function sendClientBrowserInfo(clientIpAddress = "127.0.0.1") {
     var client = new ClientJS();
     var screen = client.getCurrentResolution().split("x");
     
@@ -92,6 +92,7 @@ function sendClientBrowserInfo() {
         OS_VERSION: client.getOSVersion(),
         DEVICE: client.getDevice(),
         DEVICE_TYPE: client.getDeviceType(),
+        IP_ADDRESS: clientIpAddress,
         MOBILE: client.isMobile().toString(),
         SCREEN_POINT: "false",
         SCREEN_PRINT: client.getScreenPrint(),

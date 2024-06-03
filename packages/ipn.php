@@ -11,6 +11,9 @@ use Firebase\JWT\BeforeValidException;
 use Firebase\JWT\ExpiredException;
 
 class IPN {
+    // to fix Dynamic property
+    public $activeKey;
+    
     // Temporary 
     public $logFile;
 
@@ -34,7 +37,7 @@ class IPN {
 
 	
 
-    const RECURRING_ERROR_CODE_NEED_VERIFY  = 0x200; // Need Verify Recurring API Key
+    const RECURRING_ERROR_CODE_NEED_VERIFY  = 0x200; // Need Verify Recurring API Key // 512
 
     /**
      * available statuses for the purchase class (prcStatus)
@@ -196,17 +199,48 @@ class IPN {
              * check active posSignature 
              * check if is in set of signature too
              */
-            if(empty($objJwt->aud) || $objJwt->aud[0] != $this->activeKey){
+            write_log("------- IPN VERIFY AUD ----");
+            write_log($objJwt->aud);
+            write_log($objJwt->aud[0]);
+            write_log($this->activeKey);
+            
+            if(empty($objJwt->aud)){
+                write_log("IDS_Service_IpnController__JWT AUD is Empty");
+                throw new \Exception('IDS_Service_IpnController__JWT AUD is Empty');
+                exit;
+            }
+            
+            /**
+             * Check the type of JWT AUD, becuse the "POET" send it in diffrent type
+             */
+            $actualJwtAud = null;
+            $jwtAudType = gettype($objJwt->aud);
+            switch ($jwtAudType) {
+                case 'array':
+                    $actualJwtAud = $objJwt->aud[0];
+                    break;
+                case 'string':
+                    $actualJwtAud = $objJwt->aud;
+                    break;
+                default:
+                    write_log("IDS_Service_IpnController__JWT AUD Type is unknown");
+                    throw new \Exception('IDS_Service_IpnController__JWT AUD Type is unknown');
+                    exit;
+                    break;
+            }
+            
+            if( $actualJwtAud != $this->activeKey){
                 write_log("IDS_Service_IpnController__INVALID_SIGNATURE");
                 throw new \Exception('IDS_Service_IpnController__INVALID_SIGNATURE');
                 exit;
             }
         
-            if(!in_array($objJwt->aud[0], $this->posSignatureSet,true)) {
+            if(!in_array($actualJwtAud , $this->posSignatureSet,true)) {
                 write_log("IDS_Service_IpnController__INVALID_SIGNATURE_SET");
                 throw new \Exception('IDS_Service_IpnController__INVALID_SIGNATURE_SET');
                 exit;
             }
+            
             
             if(!isset($this->hashMethod) || $this->hashMethod==null){
                 write_log("IDS_Service_IpnController__INVALID_HASH_METHOD");
@@ -223,6 +257,12 @@ class IPN {
              * sutable hash method is SHA512 
              */
             $payloadHash = base64_encode(hash ($this->hashMethod, $payload, true ));
+            
+            write_log("------- IPN Payload ----");
+            write_log($payload);
+            write_log("------- IPN Payload encode ----");
+            write_log($payloadHash);
+
             /**
              * check IPN data integrity
              */
@@ -404,6 +444,7 @@ class IPN {
     /**
     * if header exist in HTTP request
     * and is a valid header
+    * NOTE : when header containe X-Apikey is come from Recurring API
     * @return bool 
     */
     public function hasXapikeyHeader($httpHeader) {

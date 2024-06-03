@@ -44,6 +44,7 @@
                   <div id="unsubscriptionByAdminActionLoading" class="spinner-border text-success" role="status">
                     <span class="sr-only">Loading...</span>
                   </div>
+                  <button id="approbationByAdminButton" class="btn btn-success" type="submit" >Approbation</button>
                   <button id="unsubscriptionByAdminButton" class="btn btn-secondary" type="submit" >Unsubscribe</button>
                   <button id="resubscriptionByAdminButton" class="btn btn-secondary" type="submit" >Resubscribe</button>
                   <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
