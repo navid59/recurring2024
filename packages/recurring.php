@@ -45,13 +45,16 @@
             return $ntpRpNtpID;
         }
 
-        function getAuthenticationToken() {            
-            $ntpRpAuthenticationToken = $_COOKIE['ntpRp-AuthenticationToken'];
-            
-            /** Log */
-            if(empty($ntpRpAuthenticationToken) || is_null($ntpRpAuthenticationToken)) {
-                write_log('cookie ntpRp-AuthenticationToken is empty!');
+        function getAuthenticationToken() {   
+            if(!isset($_COOKIE['ntpRp-AuthenticationToken'])) {
+                /** Log */
+                if(empty($ntpRpAuthenticationToken) || is_null($ntpRpAuthenticationToken)) {
+                    write_log('cookie ntpRp-AuthenticationToken is empty!');
+                }
+                return ("");
             }
+
+            $ntpRpAuthenticationToken = $_COOKIE['ntpRp-AuthenticationToken'];
             return $ntpRpAuthenticationToken;
         }
 

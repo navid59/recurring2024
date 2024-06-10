@@ -58,21 +58,19 @@ function enqueue_and_register_ntp_recurring_js_scripts(){
 
 
 
-
 function recurring_verifyAuth(){
-    
-    /** Log */
-    write_log('--- call -- recurring_verifyAuth() -- to Do Verifiy Auth----');
-    write_log("ntpRp-NtpID : ".$_COOKIE['ntpRp-NtpID']);
-    write_log("ntpRp-AuthenticationToken : " . $_COOKIE['ntpRp-AuthenticationToken']);
-
     global $wpdb;
     $obj = new recurringFront();
 
-    if (!isset($_COOKIE['ntpRp-AuthenticationToken']) || !isset($_COOKIE['ntpRp-NtpID'])) {
+    /**
+     * From a point, in some cases APIv2 not send "AuthenticationToken"
+     * So becuse of that , we don't check existance of this 
+     */
+    if (!isset($_COOKIE['ntpRp-NtpID'])) {
         $verifyAuthResult = array(
             'status'=> false,
-            'msg'=> "Missing Data for Verify Auth"."ntp ID : ".$_COOKIE['ntpRp-NtpID'] . "AuthenticationToken : " . $_COOKIE['ntpRp-AuthenticationToken'],
+            // 'msg'=> "Missing Data for Verify Auth"."ntp ID : ".$_COOKIE['ntpRp-NtpID'] . "AuthenticationToken : " . $_COOKIE['ntpRp-AuthenticationToken'],
+            'msg'=> "Missing Data for Verify Auth (ntpID)",
             'data' =>  $_REQUEST
             );
         echo json_encode($verifyAuthResult);
@@ -101,9 +99,8 @@ function recurring_verifyAuth(){
     
     $jsonResultData = $obj->setVerifyAuth($verifyAuthFormData);
 
-    write_log("---------WP recurring_verifyAuth ------------------");
-    write_log($jsonResultData);
-    write_log("---------------------------------------------------");
+    // write_log("-- Verify Auth Response --");
+    // write_log($jsonResultData);
 
     /**
      *  Prepare data to be added in DB, ...
@@ -138,7 +135,7 @@ function recurring_verifyAuth(){
         );
     }
     
-    /** Base on verify Auth "00" / "19",...  Data will be Add in DB */
+    /** Base on verify Auth "00" / "100",...  Data will be Add in DB */
     if($jsonResultData['code']== "00") {
         $Member['Subscription_Id'] = $subscriptionDataObj->Subscription_Id;
         $Member['PlanId'] = $subscriptionDataObj->PlanId;
@@ -147,17 +144,25 @@ function recurring_verifyAuth(){
         $Member['CreatedAt'] = date("Y-m-d");
         $Member['UpdatedAt'] = date("Y-m-d");
         $Member['StartDate'] = $subscriptionDataObj->StartDate;
-
-        /**
-         * @Navid
-         * Missing add to Arhiv 
-         */
-        
-        // Add subscription to DB 
-        $wpdb->insert( $wpdb->prefix . $obj->getDbSourceName('subscription'), $Member );
+       
+         /**
+          * Now Hear should be Do Updated, Not ADD
+          */
+ 
+          $updateResult = $wpdb->update( 
+            $wpdb->prefix . $obj->getDbSourceName('subscription'), 
+            array( 
+                'Status'             => 1,
+                'UpdatedAt'       => date("Y-m-d")
+            ),
+            array(
+                'Subscription_Id' => $Member['Subscription_Id'] 
+            )
+        );
 
         // Sned mail
-        $obj->informMember(__('New subscription','ntpRp'), __('Congratulation you successfully subscribed','ntpRp'));
+        $mailMessage = __('Congratulation you successfully subscribed','ntpRp').__(' for ','ntpRp').$Member['PlanId'];
+        $obj->informMember(__('New subscription','ntpRp'), $mailMessage);
 
         // Response ntpRpVerifyAuthData
         $customMsg = $obj->getSuccessMessagePayment();
@@ -179,8 +184,6 @@ function recurring_verifyAuth(){
             );
     echo json_encode($verifyAuthResult);
 
-    /** Log */
-    write_log('-- Happy End - recurring_verifyAuth() --- DONE -- ');
     // wp_send_json();
     die();
 }
@@ -286,9 +289,8 @@ function recurring_addSubscription() {
      
     $jsonResultData = $obj->setSubscription($subscriptionData);
 
-    write_log("---- recurring_addSubscription() --- RESULT ----");
-    write_log($jsonResultData);
-    write_log("------------------------------------------------");
+    // write_log("-- add Subscription -- RESULT --");
+    // write_log($jsonResultData);
 
     // Add subscription to DB 
     if($jsonResultData['code'] === "00") {
@@ -315,18 +317,13 @@ function recurring_addSubscription() {
          * @Navid Missing Add to History 
          *  */    
         
-         /**
-          * NAVID to DO 
-          * Check if user is exist with Status Zero for same Plan ID Then Update the USER Status
-          * If is not exist Add IT 
-          */
 
         // Add subscription to DB 
         $wpdb->insert( $wpdb->prefix . $obj->getDbSourceName('subscription'), $arrSubscriptionData );
 
         // Sned mail
         $obj->informMember(__('New subscription','ntpRp'), __('Congratulation you successfully subscribed','ntpRp'));
-    } elseif ($jsonResultData['code'] === "19") {
+    } elseif ($jsonResultData['code'] === "100") {
         /** 
          *  Add user as none confirm user
          *  */  
@@ -355,8 +352,10 @@ function recurring_addSubscription() {
             $arrSubscriptionDataJson =  json_encode($arrSubscriptionData);
             
             /** Set Subscription info from cooke to be uesd it in countinu base on Payment result */
+            if(!empty($jsonResultData['data']['details']['PaymentDetails']['AuthenticationToken'])) {
+                setcookie('ntpRp-AuthenticationToken', $jsonResultData['data']['details']['PaymentDetails']['AuthenticationToken'], time() + 600 , '/');
+            }
             setcookie('ntpRp-cookies-json', $arrSubscriptionDataJson, time() + 600 , '/');
-            setcookie('ntpRp-AuthenticationToken', $jsonResultData['data']['details']['PaymentDetails']['AuthenticationToken'], time() + 600 , '/');
             setcookie('ntpRp-NtpID', $jsonResultData['data']['details']['PaymentDetails']['NtpID'], time() + 600 , '/');
     }
     

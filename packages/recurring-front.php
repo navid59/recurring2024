@@ -73,19 +73,18 @@
         }
 
         function setVerifyAuth($formData){
-
-            write_log("----------Plugin - setVerifyAuth() ---- Before Send Form Data chech the authenticationToken & ntpID ----- If NOT empty will send -----");
-            write_log($formData['authenticationToken']);
-            write_log($formData['ntpID']);
-            write_log("---------------------------------------------------------------------------------------------------------------------------------------");
-
-            if(empty($formData['authenticationToken']) || empty($formData['ntpID'])) {
+            /**
+             * The Poet in some cases not sending the authenticationToken
+             * So in WP we send without authentication token
+             */
+            // if(empty($formData['authenticationToken']) || empty($formData['ntpID'])) 
+            if(empty($formData['ntpID'])) {
                 $responseArr = [
                     "status" => false,
-                    "msg"    => "Is Canceled. Could be because of timeout.",
+                    "msg"    => "Is Canceled. Not able to do Verify Auth. Missing ntpID",
                     "data"   => [
                         "code"    => "12",
-                        "message" => "Could be because of timeout"
+                        "message" => "Error Verify Auth. Missing ntpID"
                     ]
                 ];
                 $responseJson = json_encode($responseArr);
@@ -96,9 +95,8 @@
             $url = self::getApiUrl('3DS/verify-auth'); 
             $postData = json_encode($formData);
 
-            write_log("----------Plugin SEND This Data To Recurring API --------------");
-            write_log($postData);
-            write_log("----------------------------------------------------------------");
+            // write_log("-- Payment Verify Auth Data --");
+            // write_log($postData);
 
             $resultData = self::getData($url, $postData);
             return $resultData;

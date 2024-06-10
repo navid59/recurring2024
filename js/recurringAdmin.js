@@ -174,6 +174,7 @@ function unsubscriptionAdminModal(subscriptionId, subscriberName, planTitle) {
     jQuery('#textContinueUnsubscribe').hide();
     jQuery('#unsubscriptionByAdminButton').hide();
     jQuery('#resubscriptionByAdminButton').hide();
+    jQuery('#approbationByAdminButton').hide();
     jQuery('#unsubscriptionByAdminActionLoading').hide();
     jQuery('#unsubscribeAdminMsgBlock').removeClass('show');
     jQuery('#subscriberDetails').hide();
@@ -190,19 +191,29 @@ function unsubscriptionAdminModal(subscriptionId, subscriberName, planTitle) {
         jQuery("#unsubscriptionByAdminLoading").hide();
         if(jsonResponse.status) {
             if(jsonResponse.data.isValid) {
+                // jQuery("#userCurrentStatus").html('Active');
+            } else {
+                // jQuery("#userCurrentStatus").html('Inactive');
+                
+                
+            }
+
+            if(jsonResponse.data.UserStatus == 3 ) {
+                jQuery('#textAlreadySuspended').show();
+                jQuery("#userCurrentStatus").html('Inactive');
+                jQuery('#resubscriptionByAdminButton').show();
+            } else if(jsonResponse.data.UserStatus == 2 ) {
+                jQuery("#userCurrentStatus").html('Inactive');
+                jQuery('#textAlreadyUnsubscribed').show();
+            } else if (jsonResponse.data.UserStatus == 1 ) {
                 jQuery("#userCurrentStatus").html('Active');
                 jQuery('#textContinueUnsubscribe').show();
                 jQuery('#unsubscriptionByAdminButton').show();
-            } else {
-                jQuery("#userCurrentStatus").html('Inactive');
-                if(jsonResponse.data.UserStatus == 3 ) {
-                    jQuery('#textAlreadySuspended').show();
-                    jQuery('#resubscriptionByAdminButton').show();
-                } else if(jsonResponse.data.UserStatus == 2 ) {
-                    jQuery('#textAlreadyUnsubscribed').show();
-                }
-                
+            } else if (jsonResponse.data.UserStatus == 0 ) {
+                jQuery("#userCurrentStatus").html('Not Approved');
+                jQuery('#approbationByAdminButton').show();
             }
+
             jQuery("#userPaymentDate").html(jsonResponse.data.nextPayment);
             jQuery('#subscriberDetails').show();
 
@@ -266,39 +277,39 @@ function unsubscriptionAdminModal(subscriptionId, subscriberName, planTitle) {
 
             /** Approvation action */
             jQuery('#approbationByAdminButton').click(function (e){
-                alert("Approve Aprove!!!");
-                // jQuery('#unsubscriptionByAdminActionLoading').show();
-                // jQuery('#resubscriptionByAdminButton').hide();
 
-                // unsubscribeData = {
-                //     action : 'adminResubscription',
-                //     SubscriptionId : getNextPaymentData.subscriptionId,
-                // }
+                jQuery('#unsubscriptionByAdminActionLoading').show();
+                jQuery('#approbationByAdminButton').hide();
 
-                // jQuery.post(ajaxurl, unsubscribeData, function(response){
-                //     jsonResponse = JSON.parse(response);
-                //     // console.log(jsonResponse);
-                //     if(jsonResponse.status) {
-                //         jQuery('#unsubscriptionByAdminActionLoading').hide();
-                //         jQuery('#unsubscribeAdminMsgBlock').addClass('alert-success');
-                //         jQuery('#unsubscribeAdminAlertTitle').html('Success!');
-                //         jQuery('#unsubscribeAdminMsgContent').html(jsonResponse.msg);
-                //         jQuery('#unsubscribeAdminMsgBlock').addClass('show');
-                //     } else {
-                //         jQuery('#resubscriptionByAdminActionLoading').hide();
-                //         jQuery('#unsubscribeAdminMsgBlock').addClass('alert-warning');
-                //         jQuery('#unsubscribeAdminAlertTitle').html('Error!');
-                //         jQuery('#unsubscribeAdminMsgContent').html(jsonResponse.msg);
-                //         jQuery('#unsubscribeAdminMsgBlock').addClass('show');
-                //     }
-                // });
+                approveSubscribeData = {
+                    action : 'adminApproveSubscription',
+                    SubscriptionId : getNextPaymentData.subscriptionId,
+                }
+
+                jQuery.post(ajaxurl, approveSubscribeData, function(response){
+                    jsonResponse = JSON.parse(response);
+                    console.log(jsonResponse);
+                    if(jsonResponse.status) {
+                        jQuery('#unsubscriptionByAdminActionLoading').hide();
+                        jQuery('#unsubscribeAdminMsgBlock').addClass('alert-success');
+                        jQuery('#unsubscribeAdminAlertTitle').html('Success!');
+                        jQuery('#unsubscribeAdminMsgContent').html(jsonResponse.msg);
+                        jQuery('#unsubscribeAdminMsgBlock').addClass('show');
+                    } else {
+                        jQuery('#resubscriptionByAdminActionLoading').hide();
+                        jQuery('#unsubscribeAdminMsgBlock').addClass('alert-warning');
+                        jQuery('#unsubscribeAdminAlertTitle').html('Error!');
+                        jQuery('#unsubscribeAdminMsgContent').html(jsonResponse.msg);
+                        jQuery('#unsubscribeAdminMsgBlock').addClass('show');
+                    }
+                });
             });
 
         } else {
-            jQuery('#msgBlock').addClass('alert-warning');
-            jQuery('#alertTitle').html('Error!');
-            jQuery('#msgContent').html(jsonResponse.msg);
-            jQuery('#msgBlock').addClass('show');
+            jQuery('#unsubscribeAdminMsgBlock').addClass('alert-warning');
+            jQuery('#unsubscribeAdminAlertTitle').html('Error!');
+            jQuery('#unsubscribeAdminMsgContent').html(jsonResponse.msg);
+            jQuery('#unsubscribeAdminMsgBlock').addClass('show');
         }
     });
 
