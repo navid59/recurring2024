@@ -49,10 +49,10 @@ function getHeaderRequest() {
 
     $ipnResponse = $ntpIpn->verifyIPN();
 
-    /**
-    * IPN Output | Important to be Printed
-    */
-    echo json_encode($ipnResponse);  
+    // /**
+    // * IPN Output | Important to be Printed
+    // */
+    // echo json_encode($ipnResponse);
     
 
     write_log("--- wc-netopiapayments-recurring-notify.php | notify use the IPN As well | This is result of verifyIPN() from notify ---");
@@ -130,6 +130,12 @@ function getHeaderRequest() {
         /** Log */
         // Other type of response
     }
+
+    /**
+    * IPN Output | Important to be Printed
+    */
+    echo json_encode($ipnResponse);
+    die();
 }
 
 function hasToken($header) {

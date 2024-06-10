@@ -335,30 +335,6 @@ function unsubscriptionMyAccount() {
     });
 }
 
-// Function to retrieve client IP address via AJAX
-// Note : This function is not used, yet
-// function getClientIpAddress() {
-//     return new Promise(function(resolve, reject) {
-//         data = {
-//             action: 'getClientIP'
-//         };
-//         jQuery.ajax({
-//             url: frontAjax.ajax_url,
-//             type: 'POST',
-//             dataType: 'json',
-//             data: data,
-//             success: function(response) {
-//                 var clientIpAddress = response.ip;
-//                 resolve(clientIpAddress);
-//             },
-//             error: function(error) {
-//                 // Handle error by resolving with a default IP address
-//                 var clientIpAddress = "127.0.0.1";
-//                 resolve(clientIpAddress);
-//             }
-//         });
-//     });
-// }
 
 function addSubscription(e) {   
     e.preventDefault(); // to stop Submit Event
